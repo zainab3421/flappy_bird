@@ -26,6 +26,7 @@ pass_pipe = False
 
 bg = pygame.image.load("images/flappy_bg.png")
 ground_img = pygame.image.load("images/ground.png")
+restart_button = pygame.image.load("images/restart_button.png")
 
 class Birdy(pygame.sprite.Sprite):
     def __init__(self,x,y):
@@ -81,6 +82,22 @@ class Pipes(pygame.sprite.Sprite):
         if self.rect.right < 0:
             self.kill()
 
+class Button():
+    def __init__(self,x,y,image):
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (x,y)
+    def draw(self):
+        action = False
+        pos = pygame.mouse.get_pos()
+        if self.rect.collidepoint(pos):
+            if pygame.mouse.get_pressed()[0] == 1:
+                action = True
+        screen.blit(self.image,(self.rect.x,self.rect.y))
+        return action
+
+button = Button(screen_width//2-50,screen_height//2+50,restart_button)
+
 birdies = pygame.sprite.Group()
 pipes = pygame.sprite.Group()
 flappy = Birdy(100,int(screen_height/2))
@@ -131,6 +148,16 @@ while playing:
     for event in pygame.event.get():
         if event.type == pygame.MOUSEBUTTONDOWN and flying == False and game_over == False:
             flying = True
-    pygame.display.update()
+    if game_over:
+        font=pygame.font.SysFont("Bauhaus",72)
+        text=font.render("Game Over!",True,(0,0,0))
+        screen.blit(text,(250,350))
+        if button.draw():
+            game_over = False
+            flying = True
+            score = 0
+            pipes.empty()
+            flappy.rect.x = 100
+            flappy.rect.y = int(screen_height/2)
 
-    # make game over screen
+    pygame.display.update()
